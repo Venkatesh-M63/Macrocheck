@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MacroCheck — Free Calorie & Protein Calculator for Indians</title>
+<meta name="description" content="Calculate your daily calorie and protein needs in seconds. Built for Indian students and fitness beginners — free, no signup, works on any phone.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal-900:#0a3430;
+    --teal-800:#0f4a44;
+    --teal-700:#136058;
+    --teal-600:#177a6e;
+    --teal-500:#1d9384;
+    --teal-100:#e3f3ef;
+    --orange-500:#e8703a;
+    --orange-600:#d15f2b;
+    --cream:#f6f4ee;
+    --paper:#ffffff;
+    --ink:#152220;
+    --ink-soft:#4b5c59;
+    --line:#dfe6e2;
+    --card-shadow: 0 1px 2px rgba(10,52,48,0.06), 0 8px 24px rgba(10,52,48,0.07);
+    --radius-lg:22px;
+    --radius-md:14px;
+    --radius-sm:9px;
+
+    --bg: var(--cream);
+    --surface: var(--paper);
+    --surface-2: var(--teal-100);
+    --text: var(--ink);
+    --text-soft: var(--ink-soft);
+    --border: var(--line);
+    --accent: var(--teal-600);
+    --accent-ink: #ffffff;
+    --warn-bg:#fdf1e9;
+    --warn-ink:#8a4413;
+
+    box-sizing:border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html{ scroll-padding-top: env(safe-area-inset-top, 0px); height:100%; }
+  *,*::before,*::after{ box-sizing:inherit; }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0b1815;
+      --surface:#10201c;
+      --surface-2:#132a24;
+      --text:#eef4f1;
+      --text-soft:#a9bdb6;
+      --border:#1e332d;
+      --accent: var(--teal-500);
+      --accent-ink:#08211d;
+      --warn-bg:#2a1c10;
+      --warn-ink:#f0b184;
+      --card-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0b1815;
+    --surface:#10201c;
+    --surface-2:#132a24;
+    --text:#eef4f1;
+    --text-soft:#a9bdb6;
+    --border:#1e332d;
+    --accent: var(--teal-500);
+    --accent-ink:#08211d;
+    --warn-bg:#2a1c10;
+    --warn-ink:#f0b184;
+    --card-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.35);
+  }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    min-height:100%;
+    transition: background .25s ease, color .25s ease;
+  }
+  h1,h2,h3, .display{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin:0;
+    color:var(--text);
+  }
+  a{ color:var(--accent); }
+  img{ max-width:100%; }
+
+  .wrap{ max-width:760px; margin:0 auto; padding:0 20px; }
+  .scrollx{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+  /* Header */
+  header.site{
+    position:sticky; top:0; z-index:20;
+    top: env(safe-area-inset-top, 0px);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .site-inner{
+    max-width:760px; margin:0 auto; padding:14px 20px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .brand-mark{
+    width:34px; height:34px; border-radius:10px;
+    background: linear-gradient(155deg, var(--teal-600), var(--teal-800));
+    display:flex; align-items:center; justify-content:center;
+    color:#eafaf5; font-family:'Fraunces',serif; font-weight:700; font-size:17px;
+    flex-shrink:0;
+  }
+  .brand-name{ font-family:'Fraunces',serif; font-weight:600; font-size:19px; color:var(--text); }
+  .theme-toggle{
+    border:1px solid var(--border); background:var(--surface); color:var(--text);
+    width:40px; height:40px; border-radius:50%; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:17px;
+    flex-shrink:0;
+  }
+  .theme-toggle:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible{
+    outline:2px solid var(--accent); outline-offset:2px;
+  }
+
+  /* Hero */
+  .hero{ padding:34px 0 6px; }
+  .eyebrow-plain{ color:var(--text-soft); font-size:14.5px; margin-bottom:10px; }
+  .hero h1{ font-size:clamp(28px,7vw,38px); line-height:1.12; }
+  .hero p.lede{ color:var(--text-soft); font-size:16.5px; margin-top:12px; max-width:52ch; }
+
+  /* Calculator card */
+  .calc-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--card-shadow);
+    padding:22px;
+    margin:22px 0;
+  }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:14px; font-weight:600; margin-bottom:7px; color:var(--text); }
+  .field .hint{ font-size:12.5px; color:var(--text-soft); margin-top:5px; }
+  input[type="number"], select{
+    width:100%; font-size:16.5px; font-family:inherit; color:var(--text);
+    background:var(--bg); border:1.5px solid var(--border); border-radius:var(--radius-sm);
+    padding:13px 14px; min-height:48px;
+  }
+  select{ appearance:none; -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234b5c59' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat; background-position:right 14px center;
+    padding-right:38px;
+  }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .seg{ display:flex; border:1.5px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; }
+  .seg button{
+    flex:1; padding:12px 8px; background:var(--bg); border:none; color:var(--text-soft);
+    font-family:inherit; font-size:14.5px; font-weight:600; cursor:pointer;
+    border-right:1px solid var(--border);
+  }
+  .seg button:last-child{ border-right:none; }
+  .seg button[aria-pressed="true"]{ background:var(--accent); color:var(--accent-ink); }
+
+  .goal-cards{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media (min-width:420px){ .goal-cards{ grid-template-columns:repeat(4,1fr); } }
+  .goal-card{
+    border:1.5px solid var(--border); border-radius:var(--radius-md); background:var(--bg);
+    padding:12px 8px; text-align:center; cursor:pointer; font-family:inherit;
+  }
+  .goal-card .g-emoji{ font-size:20px; display:block; margin-bottom:4px; }
+  .goal-card .g-label{ font-size:12.5px; font-weight:600; color:var(--text); line-height:1.25; }
+  .goal-card[aria-pressed="true"]{ border-color:var(--accent); background:var(--surface-2); }
+
+  .field-error{ color:#c0392b; font-size:12.5px; margin-top:6px; display:none; }
+  .field-error.show{ display:block; }
+  input.invalid, select.invalid{ border-color:#c0392b; }
+
+  .calc-btn{
+    width:100%; margin-top:8px;
+    background: linear-gradient(155deg, var(--orange-500), var(--orange-600));
+    color:#fff7f1; border:none; border-radius:var(--radius-md);
+    font-family:inherit; font-weight:700; font-size:17px;
+    padding:16px; cursor:pointer; min-height:54px;
+    box-shadow:0 10px 22px rgba(232,112,58,0.28);
+  }
+  .calc-btn:active{ transform:translateY(1px); }
+
+  /* Results */
+  #results{ display:none; }
+  #results.show{ display:block; animation:rise .4s ease; }
+  @keyframes rise{ from{ opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+  .result-hero{
+    background: linear-gradient(155deg, var(--teal-700), var(--teal-900));
+    color:#eafaf5;
+    border-radius:var(--radius-lg);
+    padding:26px 22px;
+    margin:22px 0 14px;
+    box-shadow:var(--card-shadow);
+  }
+  .result-hero .r-label{ font-size:14px; color:#bfe4db; margin-bottom:4px; }
+  .result-hero .r-number{ font-family:'Fraunces',serif; font-size:44px; font-weight:600; line-height:1; }
+  .result-hero .r-unit{ font-size:16px; color:#bfe4db; margin-left:6px; }
+  .result-hero .r-sub{ margin-top:10px; font-size:14.5px; color:#d7ede6; }
+
+  .macro-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:16px 0; }
+  .macro-tile{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md);
+    padding:14px 10px; text-align:center;
+  }
+  .macro-tile .m-dot{ width:9px; height:9px; border-radius:50%; margin:0 auto 8px; }
+  .macro-tile .m-val{ font-family:'Fraunces',serif; font-size:21px; font-weight:600; }
+  .macro-tile .m-name{ font-size:12.5px; color:var(--text-soft); margin-top:3px; }
+
+  .bar-track{ height:12px; border-radius:99px; background:var(--surface-2); overflow:hidden; display:flex; margin:14px 0 20px; border:1px solid var(--border); }
+  .bar-seg{ height:100%; }
+
+  .protein-target{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+    padding:20px; margin:18px 0; box-shadow:var(--card-shadow);
+  }
+  .protein-target h3{ font-size:19px; margin-bottom:4px; }
+  .protein-target .p-amount{ color:var(--accent); font-weight:700; }
+  .food-table{ width:100%; border-collapse:collapse; margin-top:12px; font-size:14.5px; min-width:420px; }
+  .food-table th{ text-align:left; font-size:12.5px; color:var(--text-soft); font-weight:600; padding:8px 6px; border-bottom:1px solid var(--border); }
+  .food-table td{ padding:9px 6px; border-bottom:1px solid var(--border); }
+  .food-table tr:last-child td{ border-bottom:none; }
+
+  .action-row{ display:flex; gap:10px; margin:18px 0; flex-wrap:wrap; }
+  .action-btn{
+    flex:1; min-width:130px; background:var(--surface); border:1.5px solid var(--border); color:var(--text);
+    border-radius:var(--radius-sm); padding:12px; font-family:inherit; font-weight:600; font-size:14.5px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px;
+  }
+  .action-btn:hover{ border-color:var(--accent); }
+  .toast{
+    position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%) translateY(20px);
+    background:var(--text); color:var(--bg); padding:11px 18px; border-radius:99px; font-size:14px;
+    opacity:0; pointer-events:none; transition:all .25s ease; z-index:50; white-space:nowrap;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  .disclaimer{
+    background:var(--warn-bg); color:var(--warn-ink); border-radius:var(--radius-md);
+    padding:14px 16px; font-size:13.5px; margin:18px 0; line-height:1.5;
+  }
+
+  .affiliate-strip{
+    border:1px dashed var(--border); border-radius:var(--radius-md); padding:16px;
+    margin:22px 0; background:var(--surface-2);
+  }
+  .affiliate-strip .a-tag{ font-size:12px; color:var(--text-soft); margin-bottom:6px; }
+  .affiliate-strip a.a-link{ font-weight:600; text-decoration:none; }
+
+  /* Info sections */
+  section.info{ padding:26px 0; border-top:1px solid var(--border); }
+  section.info h2{ font-size:23px; margin-bottom:12px; }
+  section.info p, section.info li{ color:var(--text-soft); font-size:15.5px; }
+  section.info ul{ padding-left:20px; }
+  section.info li{ margin-bottom:6px; }
+
+  .steps{ display:grid; gap:12px; margin-top:12px; }
+  .step{ display:flex; gap:12px; align-items:flex-start; }
+  .step .s-num{
+    width:26px; height:26px; border-radius:50%; background:var(--surface-2); color:var(--accent);
+    display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; margin-top:2px;
+  }
+  .step p{ margin:0; color:var(--text); }
+
+  details.faq{ border-bottom:1px solid var(--border); padding:14px 0; }
+  details.faq summary{ font-weight:600; cursor:pointer; font-size:15.5px; color:var(--text); list-style:none; display:flex; justify-content:space-between; gap:10px; }
+  details.faq summary::-webkit-details-marker{ display:none; }
+  details.faq summary::after{ content:"+"; color:var(--accent); font-size:20px; flex-shrink:0; }
+  details.faq[open] summary::after{ content:"–"; }
+  details.faq p{ margin:10px 0 0; }
+
+  .related-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+  .related-card{
+    border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; background:var(--surface);
+    text-decoration:none; color:var(--text); display:block;
+  }
+  .related-card .rc-name{ font-weight:600; font-size:14.5px; }
+  .related-card .rc-desc{ font-size:12.5px; color:var(--text-soft); margin-top:4px; }
+
+  .trust-row{ display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .trust-chip{
+    font-size:12.5px; color:var(--text-soft); background:var(--surface); border:1px solid var(--border);
+    padding:6px 11px; border-radius:99px;
+  }
+
+  footer.site{ border-top:1px solid var(--border); padding:26px 0 calc(26px + env(safe-area-inset-bottom,0px)); margin-top:20px; }
+  footer.site .wrap{ display:flex; flex-direction:column; gap:10px; }
+  footer.site .flinks{ display:flex; flex-wrap:wrap; gap:14px; font-size:13.5px; }
+  footer.site .flinks a{ color:var(--text-soft); text-decoration:none; }
+  footer.site .fnote{ font-size:12.5px; color:var(--text-soft); }
+
+  @media (max-width:420px){
+    .macro-grid{ gap:8px; }
+    .related-grid{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="site-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark">M</span>
+      <span class="brand-name">MacroCheck</span>
+    </a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" type="button">🌙</button>
+  </div>
+</header>
+
+<main>
+<div class="wrap" id="top">
+
+  <section class="hero">
+    <p class="eyebrow-plain">Free daily calorie &amp; protein calculator</p>
+    <h1>How many calories and how much protein do you actually need?</h1>
+    <p class="lede">Fill in your details below and get your daily calorie target, protein goal, and a full macro breakdown — in under 10 seconds. No signup, no email, works on any phone.</p>
+  </section>
+
+  <!-- CALCULATOR -->
+  <form class="calc-card" id="calcForm" novalidate aria-label="Calorie and protein calculator">
+    <div class="row2">
+      <div class="field">
+        <label for="age">Age (years)</label>
+        <input type="number" id="age" inputmode="numeric" min="10" max="90" placeholder="e.g. 21" required>
+        <div class="field-error" id="err-age">Enter an age between 10 and 90.</div>
+      </div>
+      <div class="field">
+        <label for="height">Height (cm)</label>
+        <input type="number" id="height" inputmode="numeric" min="120" max="230" placeholder="e.g. 170" required>
+        <div class="field-error" id="err-height">Enter a height between 120–230 cm.</div>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label for="weight">Weight (kg)</label>
+        <input type="number" id="weight" inputmode="decimal" min="30" max="200" placeholder="e.g. 65" required>
+        <div class="field-error" id="err-weight">Enter a weight between 30–200 kg.</div>
+      </div>
+      <div class="field">
+        <label>Gender</label>
+        <div class="seg" role="group" aria-label="Gender">
+          <button type="button" data-gender="male" aria-pressed="true">Male</button>
+          <button type="button" data-gender="female" aria-pressed="false">Female</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="activity">Activity level</label>
+      <select id="activity">
+        <option value="1.2">Sedentary — little to no exercise</option>
+        <option value="1.375" selected>Light — exercise 1–3 days/week</option>
+        <option value="1.55">Moderate — exercise 3–5 days/week</option>
+        <option value="1.725">Active — exercise 6–7 days/week</option>
+        <option value="1.9">Very active — hard training + physical job</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Your goal</label>
+      <div class="goal-cards" role="group" aria-label="Goal">
+        <button type="button" class="goal-card" data-goal="lose" aria-pressed="false">
+          <span class="g-emoji">📉</span><span class="g-label">Lose fat</span>
+        </button>
+        <button type="button" class="goal-card" data-goal="bulk" aria-pressed="false">
+          <span class="g-emoji">🍛</span><span class="g-label">Bulk</span>
+        </button>
+        <button type="button" class="goal-card" data-goal="maintain" aria-pressed="true">
+          <span class="g-emoji">⚖️</span><span class="g-label">Maintain</span>
+        </button>
+        <button type="button" class="goal-card" data-goal="gain" aria-pressed="false">
+          <span class="g-emoji">📈</span><span class="g-label">Build muscle</span>
+        </button>
+      </div>
+    </div>
+
+    <button type="submit" class="calc-btn">Calculate my calories &amp; protein</button>
+    <div class="trust-row">
+      <span class="trust-chip">Free to use</span>
+      <span class="trust-chip">No signup</span>
+      <span class="trust-chip">Works on mobile</span>
+      <span class="trust-chip">Nothing stored</span>
+    </div>
+  </form>
+
+  <!-- RESULTS -->
+  <div id="results" aria-live="polite">
+
+    <div class="result-hero">
+      <div class="r-label">Your daily calorie target</div>
+      <span class="r-number" id="outCalories">0</span><span class="r-unit">kcal / day</span>
+      <div class="r-sub" id="outCalorieNote"></div>
+    </div>
+
+    <div class="macro-grid">
+      <div class="macro-tile">
+        <div class="m-dot" style="background:#e8703a"></div>
+        <div class="m-val" id="outProtein">0g</div>
+        <div class="m-name">Protein</div>
+      </div>
+      <div class="macro-tile">
+        <div class="m-dot" style="background:#1d9384"></div>
+        <div class="m-val" id="outCarbs">0g</div>
+        <div class="m-name">Carbs</div>
+      </div>
+      <div class="macro-tile">
+        <div class="m-dot" style="background:#c9a15a"></div>
+        <div class="m-val" id="outFat">0g</div>
+        <div class="m-name">Fat</div>
+      </div>
+    </div>
+
+    <div class="bar-track" id="barTrack">
+      <div class="bar-seg" id="barProtein" style="background:#e8703a"></div>
+      <div class="bar-seg" id="barCarbs" style="background:#1d9384"></div>
+      <div class="bar-seg" id="barFat" style="background:#c9a15a"></div>
+    </div>
+
+    <div class="protein-target">
+      <h3>Hitting <span class="p-amount" id="proteinAmount">0g</span> of protein with Indian foods</h3>
+      <p style="color:var(--text-soft); font-size:14.5px; margin:6px 0 0;">Here's roughly what that looks like across a day. Mix and match to fit what you actually eat.</p>
+      <div class="scrollx">
+        <table class="food-table">
+          <thead><tr><th>Food</th><th>Typical serving</th><th>Protein</th></tr></thead>
+          <tbody>
+            <tr><td>Boiled egg</td><td>1 egg</td><td>~6 g</td></tr>
+            <tr><td>Paneer</td><td>100 g</td><td>~18 g</td></tr>
+            <tr><td>Toor dal (cooked)</td><td>1 cup</td><td>~9 g</td></tr>
+            <tr><td>Curd / dahi</td><td>1 cup</td><td>~7 g</td></tr>
+            <tr><td>Chicken breast</td><td>100 g</td><td>~31 g</td></tr>
+            <tr><td>Milk</td><td>1 glass (250 ml)</td><td>~8 g</td></tr>
+            <tr><td>Rajma / chole (cooked)</td><td>1 cup</td><td>~15 g</td></tr>
+            <tr><td>Whey protein</td><td>1 scoop</td><td>~24 g</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button type="button" class="action-btn" id="copyBtn">📋 Copy result</button>
+      <button type="button" class="action-btn" id="printBtn">🖨️ Print</button>
+    </div>
+
+    <div class="disclaimer">
+      This is an estimate based on standard formulas (Mifflin-St Jeor), not medical advice. If you have a health condition or specific medical goals, please check with a doctor or registered dietitian before making major diet changes.
+    </div>
+
+    <div class="affiliate-strip">
+      <div class="a-tag">Sponsored</div>
+      <a class="a-link" href="YOUR_AFFILIATE_LINK" rel="sponsored noopener" target="_blank">Hitting your protein target daily is easier with a good whey protein — see options →</a>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<!-- INFO / SEO CONTENT -->
+<div class="wrap">
+
+  <section class="info" id="how-it-works">
+    <h2>How MacroCheck works</h2>
+    <p>MacroCheck estimates your Basal Metabolic Rate (BMR) using the Mifflin-St Jeor formula — the same equation used by most dietitians and fitness apps — then multiplies it by your activity level to get your Total Daily Energy Expenditure (TDEE). From there, it adjusts your calorie target based on your goal, and splits your macros (protein, carbs, fat) so you know exactly what to eat, not just how much.</p>
+  </section>
+
+  <section class="info" id="how-to-use">
+    <h2>How to use the calculator</h2>
+    <div class="steps">
+      <div class="step"><span class="s-num">1</span><p>Enter your age, height, weight and gender.</p></div>
+      <div class="step"><span class="s-num">2</span><p>Pick your activity level — be honest, not aspirational.</p></div>
+      <div class="step"><span class="s-num">3</span><p>Choose your goal: lose fat, maintain, or build muscle.</p></div>
+      <div class="step"><span class="s-num">4</span><p>Tap Calculate to see your daily calories, protein, carbs and fat.</p></div>
+    </div>
+  </section>
+
+  <section class="info" id="example">
+    <h2>Example calculation</h2>
+    <p>A 21-year-old male, 170 cm, 65 kg, who exercises 3–5 days a week and wants to build muscle: his BMR is around 1,590 kcal. Multiplied by a moderate activity factor of 1.55, his TDEE is roughly 2,465 kcal. Adding a lean surplus for muscle gain brings his target to about 2,765 kcal/day, with protein set at around 130 g to support training.</p>
+  </section>
+
+  <section class="info" id="notes">
+    <h2>Important notes</h2>
+    <ul>
+      <li>These numbers are estimates — your actual needs can vary by ±10–15% based on genetics, sleep, stress and medical conditions.</li>
+      <li>Protein targets are set higher during a calorie deficit to help protect muscle while losing fat.</li>
+      <li>Re-calculate every few weeks as your weight changes, especially during active fat loss or muscle building phases.</li>
+    </ul>
+  </section>
+
+  <section class="info" id="faq">
+    <h2>Frequently asked questions</h2>
+
+    <details class="faq">
+      <summary>What is MacroCheck?</summary>
+      <p>MacroCheck is a free online calculator that tells you your daily calorie and protein needs based on your age, height, weight, activity level and goal.</p>
+    </details>
+    <details class="faq">
+      <summary>How accurate is this calorie calculator?</summary>
+      <p>It uses the Mifflin-St Jeor equation, considered one of the most accurate formulas for estimating calorie needs in the general population. It's a strong starting point, though individual results vary.</p>
+    </details>
+    <details class="faq">
+      <summary>How much protein do I need per day?</summary>
+      <p>Most active adults need roughly 1.6–2.2 g of protein per kg of bodyweight, depending on their goal. MacroCheck calculates this automatically based on your inputs.</p>
+    </details>
+    <details class="faq">
+      <summary>Is this tool free to use?</summary>
+      <p>Yes, completely free, with no signup or payment required.</p>
+    </details>
+    <details class="faq">
+      <summary>Does it work on mobile?</summary>
+      <p>Yes, MacroCheck is built mobile-first and works smoothly on any smartphone, tablet or laptop.</p>
+    </details>
+    <details class="faq">
+      <summary>Do I need to create an account?</summary>
+      <p>No. You can use the full calculator instantly without logging in or signing up.</p>
+    </details>
+    <details class="faq">
+      <summary>Is my data stored anywhere?</summary>
+      <p>No. All calculations happen instantly in your browser — nothing you type is saved or sent anywhere.</p>
+    </details>
+    <details class="faq">
+      <summary>Can I use this if I'm vegetarian?</summary>
+      <p>Yes — the protein target applies regardless of diet. Use the Indian food table for vegetarian-friendly sources like paneer, dal, curd and rajma.</p>
+    </details>
+  </section>
+
+  <section class="info" id="related">
+    <h2>Related tools</h2>
+    <div class="related-grid">
+      <a class="related-card" href="#">
+        <div class="rc-name">BMI Calculator</div>
+        <div class="rc-desc">Check your body mass index in seconds</div>
+      </a>
+      <a class="related-card" href="#">
+        <div class="rc-name">Ideal Weight Calculator</div>
+        <div class="rc-desc">Find a healthy weight range for your height</div>
+      </a>
+      <a class="related-card" href="#">
+        <div class="rc-name">Water Intake Calculator</div>
+        <div class="rc-desc">How much water you should drink daily</div>
+      </a>
+      <a class="related-card" href="#">
+        <div class="rc-name">BMR Calculator</div>
+        <div class="rc-desc">See your resting calorie burn</div>
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="flinks">
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms</a>
+      <a href="#">Disclaimer</a>
+    </div>
+    <div class="fnote">MacroCheck provides general estimates only and is not a substitute for professional medical or nutrition advice. © 2026 MacroCheck.</div>
+  </div>
+</footer>
+
+<div class="toast" id="toast">Copied to clipboard</div>
+
+<script>
+(function(){
+  // ---------- Theme ----------
+  var themeBtn = document.getElementById('themeToggle');
+  var root = document.documentElement;
+  function applyThemeIcon(){
+    var t = root.getAttribute('data-theme');
+    var isDark = t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    themeBtn.textContent = isDark ? '☀️' : '🌙';
+  }
+  try{
+    var saved = localStorage.getItem('macrocheck-theme');
+    if(saved){ root.setAttribute('data-theme', saved); }
+  }catch(e){}
+  applyThemeIcon();
+  themeBtn.addEventListener('click', function(){
+    var current = root.getAttribute('data-theme');
+    var isDark = current === 'dark' || (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var next = isDark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try{ localStorage.setItem('macrocheck-theme', next); }catch(e){}
+    applyThemeIcon();
+  });
+
+  // ---------- Segmented / card selectors ----------
+  var gender = 'male';
+  document.querySelectorAll('.seg button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.seg button').forEach(function(b){ b.setAttribute('aria-pressed','false'); });
+      btn.setAttribute('aria-pressed','true');
+      gender = btn.getAttribute('data-gender');
+    });
+  });
+
+  var goal = 'maintain';
+  document.querySelectorAll('.goal-card').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.goal-card').forEach(function(b){ b.setAttribute('aria-pressed','false'); });
+      btn.setAttribute('aria-pressed','true');
+      goal = btn.getAttribute('data-goal');
+    });
+  });
+
+  // ---------- Validation helpers ----------
+  function validateField(input, min, max, errId){
+    var val = parseFloat(input.value);
+    var errEl = document.getElementById(errId);
+    var valid = !isNaN(val) && val >= min && val <= max;
+    if(!valid){
+      input.classList.add('invalid');
+      errEl.classList.add('show');
+    } else {
+      input.classList.remove('invalid');
+      errEl.classList.remove('show');
+    }
+    return valid;
+  }
+
+  // ---------- Calculation ----------
+  var form = document.getElementById('calcForm');
+  var results = document.getElementById('results');
+  var lastResult = null;
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+
+    var ageInput = document.getElementById('age');
+    var heightInput = document.getElementById('height');
+    var weightInput = document.getElementById('weight');
+    var activity = parseFloat(document.getElementById('activity').value);
+
+    var okAge = validateField(ageInput, 10, 90, 'err-age');
+    var okHeight = validateField(heightInput, 120, 230, 'err-height');
+    var okWeight = validateField(weightInput, 30, 200, 'err-weight');
+
+    if(!(okAge && okHeight && okWeight)){
+      var firstInvalid = form.querySelector('.invalid');
+      if(firstInvalid){ firstInvalid.focus(); firstInvalid.scrollIntoView({behavior:'smooth', block:'center'}); }
+      return;
+    }
+
+    var age = parseFloat(ageInput.value);
+    var height = parseFloat(heightInput.value);
+    var weight = parseFloat(weightInput.value);
+
+    // Mifflin-St Jeor BMR
+    var bmr = gender === 'male'
+      ? (10*weight + 6.25*height - 5*age + 5)
+      : (10*weight + 6.25*height - 5*age - 161);
+
+    var tdee = bmr * activity;
+
+    var calorieTarget, proteinPerKg, note;
+    if(goal === 'lose'){
+      calorieTarget = tdee - 500;
+      proteinPerKg = 2.0;
+      note = "A moderate deficit for steady, sustainable fat loss (~0.4–0.5 kg/week).";
+    } else if(goal === 'gain'){
+      calorieTarget = tdee + 350;
+      proteinPerKg = 1.8;
+      note = "A lean surplus to support muscle growth without excess fat gain.";
+    } else if(goal === 'bulk'){
+      calorieTarget = tdee + 750;
+      proteinPerKg = 1.8;
+      note = "A bigger surplus for faster weight and strength gains — expect some fat gain along with muscle.";
+    } else {
+      calorieTarget = tdee;
+      proteinPerKg = 1.6;
+      note = "Matches your maintenance calories to keep your weight stable.";
+    }
+
+    calorieTarget = Math.max(1200, Math.round(calorieTarget / 10) * 10);
+
+    var proteinG = Math.round(proteinPerKg * weight);
+    var proteinCal = proteinG * 4;
+    var fatCal = calorieTarget * 0.25;
+    var fatG = Math.round(fatCal / 9);
+    var carbCal = calorieTarget - proteinCal - fatCal;
+    var carbG = Math.max(0, Math.round(carbCal / 4));
+
+    // Update UI
+    document.getElementById('outCalories').textContent = calorieTarget.toLocaleString('en-IN');
+    document.getElementById('outCalorieNote').textContent = note;
+    document.getElementById('outProtein').textContent = proteinG + 'g';
+    document.getElementById('outCarbs').textContent = carbG + 'g';
+    document.getElementById('outFat').textContent = fatG + 'g';
+    document.getElementById('proteinAmount').textContent = proteinG + 'g';
+
+    var totalCalForBar = (proteinG*4) + (carbG*4) + (fatG*9);
+    var pPct = totalCalForBar ? (proteinG*4/totalCalForBar*100) : 0;
+    var cPct = totalCalForBar ? (carbG*4/totalCalForBar*100) : 0;
+    var fPct = totalCalForBar ? (fatG*9/totalCalForBar*100) : 0;
+    document.getElementById('barProtein').style.width = pPct + '%';
+    document.getElementById('barCarbs').style.width = cPct + '%';
+    document.getElementById('barFat').style.width = fPct + '%';
+
+    lastResult = {
+      calories: calorieTarget, protein: proteinG, carbs: carbG, fat: fatG, goal: goal
+    };
+
+    results.classList.add('show');
+    results.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  // Live-clear invalid state as user types
+  ['age','height','weight'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', function(){
+      this.classList.remove('invalid');
+      document.getElementById('err-'+id).classList.remove('show');
+    });
+  });
+
+  // ---------- Copy result ----------
+  var toast = document.getElementById('toast');
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(function(){ toast.classList.remove('show'); }, 2200);
+  }
+
+  document.getElementById('copyBtn').addEventListener('click', function(){
+    if(!lastResult){ return; }
+    var text = 'My daily target (MacroCheck):\n' +
+      'Calories: ' + lastResult.calories + ' kcal\n' +
+      'Protein: ' + lastResult.protein + ' g\n' +
+      'Carbs: ' + lastResult.carbs + ' g\n' +
+      'Fat: ' + lastResult.fat + ' g';
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){
+        showToast('Result copied to clipboard');
+      }).catch(function(){
+        showToast('Could not copy — try again');
+      });
+    } else {
+      showToast('Copy not supported on this browser');
+    }
+  });
+
+  document.getElementById('printBtn').addEventListener('click', function(){
+    window.print();
+  });
+})();
+</script>
+
+</body>
+</html>
